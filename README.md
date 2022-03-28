@@ -49,7 +49,7 @@ console.log(h('button', {
 //</button
 ```
 
-### Again using function for HTML tags
+### Using functions for HTML tags
 ```js
 import {
   hText as h,
@@ -134,20 +134,19 @@ console.log(div({
 
 ### Wrapping hyperapp with this API
 ```js
-import {h as hyperapp, text, app} from "https://unpkg.com/hyperapp"
+import {h, text, app} from "https://unpkg.com/hyperapp"
 import {
   wrapper,
   tags
 } from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
 
-const h = wrapper((tagName, attributes, children) => hyperapp(
+const {
+  main, h1, input, ul, li, button
+} = tags(wrapper((tagName, attributes, children) => h(
   tagName,
   attributes,
   typeof children == "string" ? text(children) : children
-))
-const {
-  main, h1, input, ul, li, button
-} = tags(h)
+)))
 
 const AddTodo = (state) => ({
   ...state,
