@@ -5,8 +5,8 @@ export default wrapper((tagName, attributes, children) => {
 
   Object.keys(attributes).forEach(key => {
     const v = attributes[key]
-    if (key.substr(0, 2) == 'on' && typeof v == 'function') {
-      e.addEventListener(key.substr(2), v)
+    if (typeof v == 'function') {
+      e.addEventListener(key.substr(0, 2) == 'on' ? key.substr(2) : key, v)
     } else {
       e.setAttribute(key, v)
     }

@@ -9,7 +9,7 @@ const resolveStyle = data =>
     if (t == "boolean" || t == "number" || t == "string") {
       const s = String(v).trim()
       if (s.length) {
-        style += ' '+camelToKebab(key)+': '+s+';'
+        style += (style ? '; ' : '')+camelToKebab(key)+': '+s
       }
     }
 
@@ -20,6 +20,7 @@ const resolveClass = data =>
   data instanceof Array ? data
     .filter(c => typeof c == "string")
     .map(c => c.trim())
+    .filter(c => c)
     .join(" ") || null :
   typeof data == "string" ? data.trim() || null : null
 
@@ -32,27 +33,32 @@ const resolveAttrs = data => Object.keys(data || {}).reduce((Attrs, key) => {
       key == "class" ? resolveClass(v) : resolveAttr(v)
 
   if (v != null) {
-    Attrs[key] = v
+    Attrs[camelToKebab(key)] = v
   }
 
   return Attrs
 }, {})
 
 const resolveChildren = data =>
+  data == null ? null : 
   typeof data == "string" || typeof data == "number" ?
-    String(data).length ? String(data) : [] :
+    String(data) || [] :
   data instanceof Array ?
     data.filter(item => item != null) :
-  typeof data == "object" && data != null ?
+  typeof data == "object" ?
     [data] : [] 
 
 export default h => (tagName, attributes, children) => {
-  children = resolveChildren(children)
+  if (children == null && (
+    typeof attributes != 'object' || attributes instanceof Array
+  )) {
+    children = attributes
+    attributes = {}
+  }
 
   return h(
     camelToKebab(tagName),
     resolveAttrs(attributes),
-    typeof children == "string" && typeof text == "function" ?
-      text(children) : children
+    resolveChildren(children)
   )
 }

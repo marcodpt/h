@@ -10,13 +10,13 @@ const escapeHtml = unsafe => unsafe
 
 const ident = (pre, V, pos, max) => {
   var div = '\n  '
-  var a = '\n  '
-  var b = '\n'
+  var a = V.length ? '\n  ' : ''
+  var b = V.length ? '\n' : ''
   if (max > 0) {
     var len = V.reduce((l, v) => l + v.length, 0)
     if (len < max) {
       var div = ' '
-      var a = pre.substr(pre.length - 1) == '"' ? '' : ' '
+      var a = !a || pre.substr(pre.length - 1) == '"' ? '' : ' '
       var b = ''
     }
   }
@@ -27,29 +27,28 @@ const ident = (pre, V, pos, max) => {
 export default wrapper((tagName, attributes, children) => {
   const maxLine = 50
 
-  const e = document.createElement(tagName)
-
-  Object.keys(attributes).forEach(key => {
-    const v = attributes[key]
-
+  var X = Object.keys(attributes).map(function (name) {
+    var v = attributes[name]
     if (v === true) {
-      return key
-    } else if (key == "class") {
-
-    }
-
-    if (key.substr(0, 2) == 'on' && typeof v == 'function') {
-      e.addEventListener(key.substr(2), v)
+      return name
+    } else if (name == 'class') {
+      return ident('class="', v.split(" "), '"', maxLine)
+    } else if (name == 'style') {
+      return ident('style="', v.split("; ").map(v => v+';'), '"', maxLine)
     } else {
-      e.setAttribute(key, v)
+      return name+'="'+v+'"'
     }
   })
 
-  if (children instanceof Array) {
-    children.forEach(child => e.appendChild(child))
-  } else if (typeof children == "string") {
-    e.appendChild(document.createTextNode(children))
+  var html = ident('<'+tagName, X, '', maxLine)
+
+  if (children == null) {
+    html += '/>'
+  } else if (children instanceof Array) {
+    html += ident('>', children, '</'+tagName+'>')
+  } else {
+    html += '>'+escapeHtml(children)+'</'+tagName+'>'
   }
 
-  return e
+  return html
 })
