@@ -15,7 +15,8 @@ QUnit.test("hDom", assert => {
     input,
     select,
     option,
-    button
+    button,
+    span
   } = tags(hDom)
   assert.equal(a().outerHTML, '<a></a>')
   assert.equal(a({
@@ -362,4 +363,20 @@ QUnit.test("hDom", assert => {
   assert.equal(window.TEST_CLICK, 3)
   e.click()
   assert.equal(window.TEST_CLICK, 1)
+
+  assert.equal(div([
+    span("This"),
+    "mix",
+    null,
+    span("Tags"),
+    "with", [
+      span("array"),
+      null,
+      ["and", span("text")]
+    ]
+  ]).outerHTML, render([
+    '<div>',
+    '  <span>This</span>mix<span>Tags</span>with<span>array</span>and<span>text</span>',
+    '</div>'
+  ]))
 })

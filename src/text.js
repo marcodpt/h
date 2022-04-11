@@ -1,3 +1,4 @@
+import selfClosing from './selfClosing.js'
 import wrapper from './wrapper.js'
 
 const escapeHtml = unsafe => unsafe
@@ -42,13 +43,13 @@ export default wrapper((tagName, attributes, children) => {
 
   var html = ident('<'+tagName, X, '', maxLine)
 
-  if (children == null) {
+  if (selfClosing.indexOf(tagName) != -1) {
     html += '/>'
-  } else if (children instanceof Array) {
-    html += ident('>', children, '</'+tagName+'>')
+  } else if (typeof children == "string") {
+    html += '>'+children+'</'+tagName+'>'
   } else {
-    html += '>'+escapeHtml(children)+'</'+tagName+'>'
+    html += ident('>', children, '</'+tagName+'>')
   }
 
   return html
-})
+}, escapeHtml, true)

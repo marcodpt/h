@@ -142,11 +142,7 @@ import {
 
 const {
   main, h1, input, ul, li, button
-} = tags(wrapper((tagName, attributes, children) => h(
-  tagName,
-  attributes,
-  typeof children == "string" ? text(children) : children
-)))
+} = tags(wrapper(h, text))
 
 const AddTodo = (state) => ({
   ...state,

@@ -12,16 +12,20 @@ QUnit.test("hText", assert => {
     button
   } = tags(hText)
 
-  assert.equal(a(), '<a/>')
+  assert.equal(a(), '<a></a>')
+  assert.equal(input(), '<input/>')
   assert.equal(a({
     href: 'www.google.com'
-  }), '<a href="www.google.com"/>')
-  assert.equal(a({
-    href: 'www.google.com'
-  }), '<a href="www.google.com"/>')
+  }), '<a href="www.google.com"></a>')
+  assert.equal(input({
+    value: 'www.google.com'
+  }), '<input value="www.google.com"/>')
   assert.equal(a({
     href: 'www.google.com'
   }, "hello"), '<a href="www.google.com">hello</a>')
+  assert.equal(input({
+    value: 'www.google.com'
+  }, "hello"), '<input value="www.google.com"/>')
   assert.equal(a({
     href: 'www.google.com'
   }, "<span>"), '<a href="www.google.com">&lt;span&gt;</a>')

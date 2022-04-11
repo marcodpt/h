@@ -12,11 +12,7 @@ export default wrapper((tagName, attributes, children) => {
     }
   })
 
-  if (children instanceof Array) {
-    children.forEach(child => e.appendChild(child))
-  } else if (typeof children == "string") {
-    e.appendChild(document.createTextNode(children))
-  }
+  children.forEach(child => e.appendChild(child))
 
   return e
-})
+}, text => document.createTextNode(text))

@@ -27,7 +27,7 @@ const resolveClass = data =>
 const resolveAttr = data => 
   data != null && data !== false && typeof data != "object" ? data : null
 
-const resolveAttrs = data => Object.keys(data || {}).reduce((Attrs, key) => {
+const resolveAttrs = data => Object.keys(data).reduce((Attrs, key) => {
   var v = data[key]
   v = key == "style" ? resolveStyle(v) :
       key == "class" ? resolveClass(v) : resolveAttr(v)
@@ -39,26 +39,35 @@ const resolveAttrs = data => Object.keys(data || {}).reduce((Attrs, key) => {
   return Attrs
 }, {})
 
-const resolveChildren = data =>
-  data == null ? null : 
-  typeof data == "string" || typeof data == "number" ?
-    String(data) || [] :
-  data instanceof Array ?
-    data.filter(item => item != null) :
+const resolveChildren = (data, text, preserve) =>
+  data == null ? [] : 
+  (typeof data == "string" && data.length) || typeof data == "number" ?
+    (preserve ? text(String(data)) : [text(String(data))]) :
+  data instanceof Array ? data
+    .map(item => preserve ? item : resolveChildren(item, text))
+    .filter(item => item != null)
+    .reduce((A, item) => A.concat(item), []) :
   typeof data == "object" ?
     [data] : [] 
 
-export default h => (tagName, attributes, children) => {
+export default (h, text, preserve) => (tagName, attributes, children) => {
   if (children == null && (
     typeof attributes != 'object' || attributes instanceof Array
   )) {
     children = attributes
     attributes = {}
   }
+  if (attributes == null || typeof attributes != 'object') {
+    attributes = {}
+  }
 
   return h(
     camelToKebab(tagName),
     resolveAttrs(attributes),
-    resolveChildren(children)
+    resolveChildren(
+      children,
+      typeof text == 'function' ? text : x => x,
+      preserve 
+    )
   )
 }
