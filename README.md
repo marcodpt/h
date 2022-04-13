@@ -192,9 +192,7 @@ app({
   }) => main([
     h1("To do list"),
     input({ type: "text", oninput: NewValue, value }),
-    ul({},
-      todos.map((todo) => li(todo))
-    ),
+    ul(todos.map((todo) => li(todo))),
     button({ onclick: AddTodo }, "New!"),
   ])),
   node: document.getElementById("app"),
