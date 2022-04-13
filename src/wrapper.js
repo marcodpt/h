@@ -1,3 +1,6 @@
+import selfClosing from './selfClosing.js'
+import normalTags from './normalTags.js'
+
 const camelToKebab = string => string
   .replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2')
   .toLowerCase()
@@ -25,7 +28,10 @@ const resolveClass = data =>
   typeof data == "string" ? data.trim() || null : null
 
 const resolveAttr = data => 
-  data != null && data !== false && typeof data != "object" ? data : null
+  data === true ? '' :
+  typeof data == "number" ? String(data) :
+  typeof data == "string" || typeof data == "function" ? data :
+    null
 
 const resolveAttrs = data => Object.keys(data).reduce((Attrs, key) => {
   var v = data[key]
@@ -33,24 +39,29 @@ const resolveAttrs = data => Object.keys(data).reduce((Attrs, key) => {
       key == "class" ? resolveClass(v) : resolveAttr(v)
 
   if (v != null) {
-    Attrs[camelToKebab(key)] = v
+    key = camelToKebab(key)
+    if (typeof v == "function" && key.substr(0, 2) == "on") {
+      key = key.substr(2)
+    }
+
+    Attrs[key] = v
   }
 
   return Attrs
 }, {})
 
-const resolveChildren = (data, text, preserve) =>
+const resolveChildren = (data, text, preserve, raw) =>
   data == null ? [] : 
   (typeof data == "string" && data.length) || typeof data == "number" ?
-    (preserve ? text(String(data)) : [text(String(data))]) :
+    (preserve ? (raw ? data : text(String(data))) : [text(String(data))]) :
   data instanceof Array ? data
-    .map(item => preserve ? item : resolveChildren(item, text))
+    .map(item => resolveChildren(item, text, preserve, true))
     .filter(item => item != null)
     .reduce((A, item) => A.concat(item), []) :
   typeof data == "object" ?
     [data] : [] 
 
-export default (h, text, preserve) => (tagName, attributes, children) => {
+const resolver = (text, preserve) => (tagName, attributes, children) => {
   if (children == null && (
     typeof attributes != 'object' || attributes instanceof Array
   )) {
@@ -60,14 +71,39 @@ export default (h, text, preserve) => (tagName, attributes, children) => {
   if (attributes == null || typeof attributes != 'object') {
     attributes = {}
   }
-
-  return h(
-    camelToKebab(tagName),
-    resolveAttrs(attributes),
-    resolveChildren(
-      children,
-      typeof text == 'function' ? text : x => x,
-      preserve 
-    )
+  attributes = resolveAttrs(attributes)
+  children = resolveChildren(
+    children, typeof text == 'function' ? text : x => x, preserve 
   )
+
+  return [camelToKebab(tagName), attributes, children]
+}
+
+export default (h, text, preserve) => {
+  const r = resolver(text, preserve)
+  const Tags = {}
+
+  selfClosing.forEach(tag => {
+    Tags[tag] = attributes => {
+      const [t, a, c] = r(tag, attributes, [])
+      return h(t, a, c)
+    }
+  })
+
+  normalTags.forEach(tag => {
+    Tags[tag] = (attributes, children) => {
+      const [t, a, c] = r(tag, attributes, children)
+      return h(t, a, c)
+    }
+  })
+
+  return (tagName, attributes, children) => {
+    const isF = typeof tagName == 'function'
+    const [t, a, c] = r(isF ? '' : tagName, attributes, children)
+    if (isF) {
+      return tagName(Tags, a, c)
+    } else {
+      return h(t, a, c)
+    }
+  }
 }

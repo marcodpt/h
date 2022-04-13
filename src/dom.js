@@ -6,7 +6,7 @@ export default wrapper((tagName, attributes, children) => {
   Object.keys(attributes).forEach(key => {
     const v = attributes[key]
     if (typeof v == 'function') {
-      e.addEventListener(key.substr(0, 2) == 'on' ? key.substr(2) : key, v)
+      e.addEventListener(key, v)
     } else {
       e.setAttribute(key, v)
     }

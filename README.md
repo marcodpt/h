@@ -13,6 +13,7 @@ Yet another hyperscript function
    [mithril](https://github.com/MithrilJS/mithril.js/)...)
    in the same consistent API
  - Generate all HTML tags as functions
+ - Generate your own custom tags
 
 ## Samples
 ### DOM mode
@@ -22,6 +23,23 @@ import {hDom as h} from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
 const e = h('button', {
   click: () => console.log('Hi!') 
 }, 'Click me!')
+
+console.log(e.outerHTML)
+//<button>Click me!</button>
+
+e.click()
+//Hi!
+```
+
+### DOM mode with HTML tags
+```js
+import {hDom as h} from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
+
+const e = h(({button}) => {
+  button({
+    click: () => console.log('Hi!') 
+  }, 'Click me!')
+})
 
 console.log(e.outerHTML)
 //<button>Click me!</button>
@@ -49,20 +67,13 @@ console.log(h('button', {
 //</button
 ```
 
-### Using functions for HTML tags
+### Text mode with HTML tags
 ```js
-import {
-  hText as h,
-  tags
-} from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
+import {hText as h} from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
 
-const {
-  button,
-  i,
-  span
-} = tags(h)
-
-console.log(button({
+console.log(h(({
+  button, i, span
+}) => button({
   type: 'button'
   disabled: true
 }, [
@@ -70,79 +81,98 @@ console.log(button({
     class: 'icon-check'
   }),
   span('Submit!')
-]))
+])))
 //<button type="button" disabled>
 //  <i class="icon-check" />
 //  <span>Submit!</span>
 //</button
 ```
 
+### Create your own html elements
+```js
+import {hDom as html} from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
+
+const myButton = (attributes, children) => html(({
+  button, i
+}, resolvedAttrs, resolvedChildren) => {
+  //NO MATTER WHAT USER PUTS IN ATTRIBUTES OR CHILDREN
+
+  //resolvedAttrs is always an object
+  //with kebab case keys
+  //with string or functions values 
+
+  //resolvedChildren is always a DOM array
+
+  return button({
+    class: "btn btn-"+resolvedAttrs.btn
+  }, [
+    resolvedAttrs.icon ? i({class: resolvedAttrs.icon}) : null
+  ].concat(children))
+}, attributes, children)
+
+console.log(myButton({
+  btn: 'primary',
+  icon: 'fas fa-play'
+}, ' Run!').outerHTML)
+//<button class="btn btn-primary"><i class="fas fa-play"></i> Run!</button>
+```
+
 ### Syntax sugar
 ```js
-import {
-  hText as h,
-  tags
-} from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
-
-const {div} = tags(h)
+import {hText as html} from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
 
 //attributes are optional, text nodes are handled automatic
-console.log(div("Hello!"))
+console.log(html(({div}) => div("Hello!")))
 //<div>Hello!</div>
 
 //class might be an array
-console.log(div({
+console.log(html(({div}) => div({
   class: 'container mx-auto'
-}, "Hello!"))
+}, "Hello!")))
 //<div class="container mx-auto">Hello!</div>
-console.log(div({
+console.log(html(({div}) => div({
   class: [
     'container',
     'mx-auto'
   ]
-}, "Hello!"))
+}, "Hello!")))
 //<div class="container mx-auto">Hello!</div>
 
 //style might be an object with case conversion
-console.log(div({
+console.log(html(({div}) => div({
   style: 'white-space: pre-wrap'
-}, "Hello!"))
+}, "Hello!")))
 //<div style="white-space: pre-wrap">Hello!</div>
-console.log(div({
+console.log(html(({div}) => div({
   style: {
     'white-space': 'pre-wrap'
   }
-}, "Hello!"))
+}, "Hello!")))
 //<div style="white-space: pre-wrap">Hello!</div>
-console.log(div({
+console.log(html(({div}) => div({
   style: {
     whiteSpace: 'pre-wrap'
   }
-}, "Hello!"))
+}, "Hello!")))
 //<div style="white-space: pre-wrap">Hello!</div>
 
 //attributes have case conversion too
-console.log(div({
+console.log(html(({div}) => div({
   'data-bind': 'some data...'
-}, "Hello!"))
+}, "Hello!")))
 //<div data-bind="some data...">Hello!</div>
-console.log(div({
+console.log(html(({div}) => div({
   dataBind: 'some data...'
-}, "Hello!"))
+}, "Hello!")))
 //<div data-bind="some data...">Hello!</div>
 ```
 
 ### Wrapping hyperapp with this API
 ```js
 import {h, text, app} from "https://unpkg.com/hyperapp"
-import {
-  wrapper,
-  tags
-} from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
+import {wrapper} from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
 
-const {
-  main, h1, input, ul, li, button
-} = tags(wrapper(h, text))
+const html = wrapper(h, text)
 
 const AddTodo = (state) => ({
   ...state,
@@ -157,15 +187,16 @@ const NewValue = (state, event) => ({
 
 app({
   init: { todos: [], value: "" },
-  view: ({ todos, value }) =>
-    main([
-      h1("To do list"),
-      input({ type: "text", oninput: NewValue, value }),
-      ul({},
-        todos.map((todo) => li(todo))
-      ),
-      button({ onclick: AddTodo }, "New!"),
-    ]),
+  view: ({ todos, value }) => html(({
+    main, h1, input, ul, li, button
+  }) => main([
+    h1("To do list"),
+    input({ type: "text", oninput: NewValue, value }),
+    ul({},
+      todos.map((todo) => li(todo))
+    ),
+    button({ onclick: AddTodo }, "New!"),
+  ])),
   node: document.getElementById("app"),
 })
 ```

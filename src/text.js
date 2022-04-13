@@ -30,7 +30,7 @@ export default wrapper((tagName, attributes, children) => {
 
   var X = Object.keys(attributes).map(function (name) {
     var v = attributes[name]
-    if (v === true) {
+    if (v == "") {
       return name
     } else if (name == 'class') {
       return ident('class="', v.split(" "), '"', maxLine)
