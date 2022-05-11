@@ -1,7 +1,12 @@
 # h
 Yet another hyperscript function 
 
-[Tests](https://marcodpt.github.io/h/)
+## Examples
+ - [alert](https://marcodpt.github.io/h/)
+ - [chart](https://marcodpt.github.io/h/?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fmarcodpt%2Fchart%2Fsamples.js)
+ - [graph](https://marcodpt.github.io/h/?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fmarcodpt%2Fgraph%2Fsamples.js)
+ - [navbar](https://marcodpt.github.io/h/?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fmarcodpt%2Fnavbar%2Fsamples.js)
+ - [SPA](https://marcodpt.github.io/h/?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fmarcodpt%2Fspa%2Fsamples.js)
 
 ## Motivation
  - Present hyperscript as an es6 module
@@ -13,9 +18,17 @@ Yet another hyperscript function
    [mithril](https://github.com/MithrilJS/mithril.js/)...)
    in the same consistent API
  - Generate all HTML tags as functions
- - Generate your own custom tags
+ - Generate your own custom elements with great experience
 
-## Samples
+## Definition
+An `element` is a function with the following signature
+
+### element(params, children) -> node
+ - object `params`: is the params that element recieve as attributes
+ - array `children`: is the children nodes of element
+ - return DOM `node`: the DOM node representing the element
+
+## Usage
 ### DOM mode
 ```js
 import {hDom as h} from 'https://cdn.jsdelivr.net/gh/marcodpt/h/index.js'
@@ -198,6 +211,11 @@ app({
   node: document.getElementById("app"),
 })
 ```
+
+## Tests
+ - [wrapper](https://marcodpt.github.io/h/tests.html?url=.%2Ftests%2Fwrapper.js)
+ - [hDom](https://marcodpt.github.io/h/tests.html?url=.%2Ftests%2Fdom.js)
+ - [hText](https://marcodpt.github.io/h/tests.html?url=.%2Ftests%2Ftext.js)
 
 ## Contributing
 Yes please! It is a very simple project, no guidelines, any contribution is
