@@ -17,8 +17,9 @@
         import {getUrl} from './lib.js'
 
         QUnit.config.autostart = false
+        const url = getUrl()
 
-        import(getUrl()).then(tests => {
+        import(url).then(tests => {
           QUnit.start()
           tests.default()
         }).catch(err => {
