@@ -1,6 +1,11 @@
 import {hDom as html} from './index.js'
 import test from './samples.js'
-import {getUrl} from './lib.js'
+import {getUrl, source} from './lib.js'
+
+var current = {
+  children: null,
+  builder: null
+}
 
 const url = getUrl() || './samples.js'
 const error = {
@@ -12,7 +17,7 @@ const error = {
 }
 const defaultTitle = document.title
 
-const setElement = e => {
+const setElement = (e, attributes, children) => {
   const target = document.getElementById('element')
   target.innerHTML = ''
   if (e) {
@@ -21,6 +26,30 @@ const setElement = e => {
     } else if (typeof e == "object") {
       target.appendChild(e)
     }
+  }
+  const attrs = source(attributes)
+  document.getElementById('attributes').textContent = attrs
+  document.getElementById('edit').querySelector('textarea').value = attrs
+}
+
+window.change = input => {
+  try {
+    var attrs = null
+    eval('attrs = '+input.value)
+    setElement(
+      current.builder(attrs, current.children),
+      attrs,
+      current.children
+    )
+    input.classList.remove('is-invalid')
+    input.classList.add('is-valid')
+  } catch (err) {
+    input.classList.remove('is-valid')
+    input.classList.add('is-invalid')
+    document
+      .getElementById('edit')
+      .querySelector('.invalid-feedback')
+      .textContent = err.toString()
   }
 }
 
@@ -34,8 +63,7 @@ const rebuild = x => {
     setElement()
   }
 
-  const newTitle = defaultTitle+(title ? ': ' : '')+(title || '')
-  document.title = newTitle
+  document.title = title || defaultTitle
   const link = document.getElementById('gh')
   if (gh) {
     link.classList.remove('d-none')
@@ -50,7 +78,9 @@ const rebuild = x => {
 
   if (x && x.samples) {
     const setSample = ({attributes, children}) => {
-      setElement(x.element(attributes, children))
+      current.builder = x.element
+      current.children = children
+      setElement(x.element(attributes, children), attributes, children)
     }
 
     const K = Object.keys(x.samples)

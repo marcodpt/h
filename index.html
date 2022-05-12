@@ -41,7 +41,51 @@
       </div>
       <h2 id="title"></h2>
       <div id="samples"></div>
-      <div id="element"></div>
+      <ul class="nav nav-tabs mt-3">
+        <li class="nav-item">
+          <button
+            class="nav-link active"
+            data-bs-toggle="tab"
+            data-bs-target="#element"
+            type="button"
+          >Element</button>
+        </li>
+        <li class="nav-item">
+          <button
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#attributes"
+            type="button"
+          >Attributes</button>
+        </li>
+        <li class="nav-item">
+          <button
+            class="nav-link"
+            data-bs-toggle="tab"
+            data-bs-target="#edit"
+            type="button"
+          >Edit</button>
+        </li>
+      </ul>
+      <div class="tab-content border border-top-0 p-3 mb-5">
+        <div class="tab-pane active" id="element"></div>
+        <div
+          class="tab-pane"
+          id="attributes"
+          style="white-space:pre-wrap"
+        ></div>
+        <div class="tab-pane" id="edit">
+          <textarea
+            class="form-control"
+            rows="10"
+            onchange="change(this)"
+          ></textarea>
+          <div
+            class="invalid-feedback"
+            style="white-space:pre-wrap"
+          ></div>
+        </div>
+      </div>
     </div>
     <script type="module" src="app.js"></script>
   </body>
